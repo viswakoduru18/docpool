@@ -362,7 +362,7 @@ const app = {
               </div>
               <div class="mt-3 p-3 bg-white rounded border border-blue-300">
                 <p class="text-xs text-gray-600 mb-1">Preview:</p>
-                <p class="font-semibold text-blue-700">
+                <p id="namePreview" class="font-semibold text-blue-700">
                   Dr. ${this.formData.first_name || '[First]'} ${this.formData.middle_name || ''} ${this.formData.last_name || '[Last]'}
                 </p>
               </div>
@@ -491,11 +491,23 @@ const app = {
     }
   },
   
+  updateNamePreview() {
+    const previewEl = document.getElementById('namePreview');
+    if (previewEl) {
+      const firstName = this.formData.first_name || '[First]';
+      const middleName = this.formData.middle_name || '';
+      const lastName = this.formData.last_name || '[Last]';
+      previewEl.textContent = `Dr. ${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim();
+    }
+  },
+  
   renderInput(name, label, type, placeholder, required) {
     const value = this.formData[name] || '';
-    // Add oninput for name fields to update preview
+    // Add oninput for name fields to update preview without re-rendering
     const isNameField = ['first_name', 'middle_name', 'last_name'].includes(name);
-    const inputHandler = isNameField ? `oninput="app.formData.${name} = this.value; app.render();"` : `onchange="app.formData.${name} = this.value"`;
+    const inputHandler = isNameField 
+      ? `oninput="app.formData.${name} = this.value; app.updateNamePreview();"` 
+      : `onchange="app.formData.${name} = this.value"`;
     
     return `
       <div>
