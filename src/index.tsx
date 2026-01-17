@@ -109,7 +109,8 @@ app.post('/api/doctors', async (c) => {
         profile_photo, hospital_photo, logo_photo,
         mobile_number, email, whatsapp_enabled,
         primary_qualification, specialization, super_specialization,
-        years_of_experience, medical_council_reg_no, registration_council,
+        years_of_experience, experience_history, manual_experience_override,
+        medical_council_reg_no, registration_council,
         registration_valid_till, practice_type, primary_hospital_name,
         secondary_hospitals, clinic_name, opd_days, opd_timings,
         consultation_fee, teleconsultation_available,
@@ -130,7 +131,7 @@ app.post('/api/doctors', async (c) => {
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?
       )
     `).bind(
       doctorId,
@@ -151,6 +152,8 @@ app.post('/api/doctors', async (c) => {
       data.specialization || null,
       data.super_specialization || null,
       data.years_of_experience || null,
+      data.experience_history ? JSON.stringify(data.experience_history) : null,
+      data.manual_experience_override ? 1 : 0,
       data.medical_council_reg_no || null,
       data.registration_council || null,
       data.registration_valid_till || null,

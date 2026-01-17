@@ -393,7 +393,50 @@ const app = {
             ${this.renderInput('primary_qualification', 'Primary Qualification', 'text', 'MBBS')}
             ${this.renderInput('specialization', 'Specialization', 'text', 'Cardiology')}
             ${this.renderInput('super_specialization', 'Super Specialization', 'text', 'DM Cardiology')}
-            ${this.renderInput('years_of_experience', 'Years of Experience', 'number', '10')}
+            
+            <!-- Experience Section -->
+            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700">
+                    <i class="fas fa-briefcase mr-2"></i>Work Experience
+                  </label>
+                  <p class="text-xs text-gray-600 mt-1">
+                    <i class="fas fa-calculator mr-1"></i>Total: <span id="totalExperience" class="font-bold text-orange-700">${this.calculateTotalExperience()} years</span>
+                  </p>
+                </div>
+                <button 
+                  type="button"
+                  onclick="app.addExperience()"
+                  class="text-xs bg-orange-600 text-white px-3 py-1 rounded-full hover:bg-orange-700"
+                >
+                  <i class="fas fa-plus mr-1"></i>Add
+                </button>
+              </div>
+              
+              <!-- Manual Override -->
+              <div class="mb-3">
+                <label class="flex items-center space-x-2 text-xs text-gray-700">
+                  <input 
+                    type="checkbox" 
+                    id="manualExperienceOverride"
+                    class="rounded"
+                    ${this.formData.manual_experience_override ? 'checked' : ''}
+                    onchange="app.toggleManualExperience(this.checked)"
+                  />
+                  <span>Manually enter total years (if not providing history)</span>
+                </label>
+              </div>
+              
+              <div id="manualExperienceInput" class="${this.formData.manual_experience_override ? '' : 'hidden'}">
+                ${this.renderInput('years_of_experience', 'Total Years of Experience', 'number', '10')}
+              </div>
+              
+              <div id="experienceList" class="${this.formData.manual_experience_override ? 'hidden' : 'space-y-3'}">
+                ${this.renderExperienceList()}
+              </div>
+            </div>
+            
             ${this.renderInput('medical_council_reg_no', 'Medical Council Registration No', 'text')}
             ${this.renderInput('registration_council', 'Registration Council', 'text', 'State Medical Council')}
             ${this.renderInput('registration_valid_till', 'Registration Valid Till', 'date')}
@@ -843,6 +886,290 @@ const app = {
     if (confirm('Remove this place?')) {
       this.formData.working_places[type].splice(index, 1);
       this.render();
+    }
+  },
+  
+  // Experience Management Methods
+  calculateTotalExperience() {
+    if (this.formData.manual_experience_override) {
+      return this.formData.years_of_experience || 0;
+    }
+    
+    if (!this.formData.experience_history || this.formData.experience_history.length === 0) {
+      return 0;
+    }
+    
+    let totalMonths = 0;
+    const currentDate = new Date();
+    
+    this.formData.experience_history.forEach(exp => {
+      const fromDate = new Date(exp.fromYear, exp.fromMonth - 1, 1);
+      const toDate = exp.current ? currentDate : new Date(exp.toYear, exp.toMonth - 1, 1);
+      
+      const monthsDiff = (toDate.getFullYear() - fromDate.getFullYear()) * 12 + 
+                        (toDate.getMonth() - fromDate.getMonth());
+      totalMonths += monthsDiff;
+    });
+    
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+    
+    // Store calculated value
+    this.formData.years_of_experience = years + (months / 12);
+    
+    return months > 0 ? `${years}.${months}` : years;
+  },
+  
+  toggleManualExperience(checked) {
+    this.formData.manual_experience_override = checked;
+    this.render();
+  },
+  
+  renderExperienceList() {
+    if (!this.formData.experience_history) {
+      this.formData.experience_history = [];
+    }
+    
+    const experiences = this.formData.experience_history;
+    
+    if (experiences.length === 0) {
+      return `
+        <div class="text-center py-4 text-gray-500 text-sm">
+          <i class="fas fa-info-circle mr-2"></i>No work experience added yet
+        </div>
+      `;
+    }
+    
+    return experiences.map((exp, index) => `
+      <div class="bg-white rounded-lg p-3 border border-gray-300">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <h4 class="font-semibold text-gray-800 text-sm">${exp.hospitalClinicName}</h4>
+            <p class="text-xs text-gray-600 mt-1">
+              <i class="fas fa-calendar-alt mr-1"></i>
+              ${this.getMonthName(exp.fromMonth)} ${exp.fromYear} - 
+              ${exp.current ? '<span class="text-green-600 font-semibold">Present</span>' : `${this.getMonthName(exp.toMonth)} ${exp.toYear}`}
+            </p>
+            <p class="text-xs text-orange-600 font-semibold mt-1">
+              <i class="fas fa-clock mr-1"></i>Duration: ${this.calculateDuration(exp)}
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="app.removeExperience(${index})"
+            class="text-red-600 hover:text-red-800 ml-2"
+          >
+            <i class="fas fa-trash text-sm"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  },
+  
+  addExperience() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.remove();
+    };
+    
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i >= currentYear - 50; i--) {
+      years.push(i);
+    }
+    
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 rounded-t-2xl">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold">Add Work Experience</h3>
+            <button onclick="this.closest('.fixed').remove()" class="text-white hover:text-gray-200">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-4 space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Hospital/Clinic Name *
+            </label>
+            <input
+              type="text"
+              id="exp_hospital_name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              placeholder="Apollo Hospital / Dr. Smith Clinic"
+            />
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">From Month</label>
+              <select id="exp_from_month" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                <option value="">Select</option>
+                ${this.getMonthOptions()}
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">From Year</label>
+              <select id="exp_from_year" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                <option value="">Select</option>
+                ${years.map(y => `<option value="${y}">${y}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="flex items-center space-x-2 text-sm text-gray-700">
+              <input 
+                type="checkbox" 
+                id="exp_current"
+                class="rounded"
+                onchange="document.getElementById('toDateFields').classList.toggle('hidden', this.checked)"
+              />
+              <span>Currently working here</span>
+            </label>
+          </div>
+          
+          <div id="toDateFields" class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">To Month</label>
+              <select id="exp_to_month" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                <option value="">Select</option>
+                ${this.getMonthOptions()}
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">To Year</label>
+              <select id="exp_to_year" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                <option value="">Select</option>
+                ${years.map(y => `<option value="${y}">${y}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          
+          <button
+            type="button"
+            onclick="app.saveExperience()"
+            class="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition"
+          >
+            <i class="fas fa-save mr-2"></i>Save Experience
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  },
+  
+  saveExperience() {
+    const hospitalClinicName = document.getElementById('exp_hospital_name').value;
+    const fromMonth = parseInt(document.getElementById('exp_from_month').value);
+    const fromYear = parseInt(document.getElementById('exp_from_year').value);
+    const current = document.getElementById('exp_current').checked;
+    const toMonth = current ? null : parseInt(document.getElementById('exp_to_month').value);
+    const toYear = current ? null : parseInt(document.getElementById('exp_to_year').value);
+    
+    if (!hospitalClinicName) {
+      alert('Please enter hospital/clinic name');
+      return;
+    }
+    
+    if (!fromMonth || !fromYear) {
+      alert('Please select from date');
+      return;
+    }
+    
+    if (!current && (!toMonth || !toYear)) {
+      alert('Please select to date or check "Currently working here"');
+      return;
+    }
+    
+    if (!current) {
+      const fromDate = new Date(fromYear, fromMonth - 1);
+      const toDate = new Date(toYear, toMonth - 1);
+      if (toDate < fromDate) {
+        alert('To date cannot be before from date');
+        return;
+      }
+    }
+    
+    if (!this.formData.experience_history) {
+      this.formData.experience_history = [];
+    }
+    
+    this.formData.experience_history.push({
+      hospitalClinicName,
+      fromMonth,
+      fromYear,
+      toMonth,
+      toYear,
+      current
+    });
+    
+    // Close modal
+    document.querySelector('.fixed').remove();
+    
+    // Re-render section
+    this.render();
+    
+    // Update total experience display
+    const totalEl = document.getElementById('totalExperience');
+    if (totalEl) {
+      totalEl.textContent = this.calculateTotalExperience() + ' years';
+    }
+    
+    this.showToast('Experience added successfully', 'success');
+  },
+  
+  removeExperience(index) {
+    if (confirm('Remove this experience?')) {
+      this.formData.experience_history.splice(index, 1);
+      this.render();
+      
+      // Update total experience display
+      const totalEl = document.getElementById('totalExperience');
+      if (totalEl) {
+        totalEl.textContent = this.calculateTotalExperience() + ' years';
+      }
+    }
+  },
+  
+  getMonthOptions() {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months.map((month, index) => 
+      `<option value="${index + 1}">${month}</option>`
+    ).join('');
+  },
+  
+  getMonthName(monthNum) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[monthNum - 1] || '';
+  },
+  
+  calculateDuration(exp) {
+    const fromDate = new Date(exp.fromYear, exp.fromMonth - 1, 1);
+    const toDate = exp.current ? new Date() : new Date(exp.toYear, exp.toMonth - 1, 1);
+    
+    const monthsDiff = (toDate.getFullYear() - fromDate.getFullYear()) * 12 + 
+                      (toDate.getMonth() - fromDate.getMonth());
+    
+    const years = Math.floor(monthsDiff / 12);
+    const months = monthsDiff % 12;
+    
+    if (years === 0) {
+      return `${months} month${months !== 1 ? 's' : ''}`;
+    } else if (months === 0) {
+      return `${years} year${years !== 1 ? 's' : ''}`;
+    } else {
+      return `${years} year${years !== 1 ? 's' : ''} ${months} month${months !== 1 ? 's' : ''}`;
     }
   }
 };
