@@ -20,6 +20,7 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 - ✅ **Smart Name Entry** - Separate First, Middle, Last name fields with automatic "Dr." prefix
 - ✅ **Live Name Preview** - Real-time preview of full name as you type
 - ✅ **📸 Photo Upload System** - Capture or upload 3 photos (Profile, Hospital/Clinic, Logo)
+- ✅ **💼 Smart Experience Tracking** - Add multiple work history entries with auto-calculated total OR manual entry
 - ✅ **🏥 Multi-Place Working Hours** - Add multiple hospitals/clinics with individual schedules
 - ✅ **📅 Smart Day Selection** - "Select All Days" button for quick scheduling
 - ✅ **⏰ Default Timing** - Pre-filled with 10:00 AM to 7:00 PM
@@ -61,7 +62,17 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 - Primary Qualification (MBBS/BDS/BAMS/BHMS)
 - Specialization (Cardiology/Dermatology/Ortho, etc.)
 - Super Specialization (DM/MCh)
-- Years of Experience
+- **💼 Work Experience Tracking** (Two modes)
+  - **Detailed History Mode** (Default)
+    - Add multiple work entries
+    - Hospital/Clinic name for each position
+    - From Month/Year to Month/Year (or "Currently working")
+    - Auto-calculates total years of experience
+    - Shows duration for each entry
+  - **Manual Entry Mode** (For privacy-conscious doctors)
+    - Simple checkbox to enable
+    - Directly enter total years
+    - Skip detailed history
 - Medical Council Registration Number
 - Registration Council (State/NMC)
 - Registration Valid Till Date
