@@ -19,6 +19,11 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 - ✅ **9-Section Data Collection Form** - Comprehensive doctor information capture
 - ✅ **Smart Name Entry** - Separate First, Middle, Last name fields with automatic "Dr." prefix
 - ✅ **Live Name Preview** - Real-time preview of full name as you type
+- ✅ **📸 Photo Upload System** - Capture or upload 3 photos (Profile, Hospital/Clinic, Logo)
+- ✅ **🏥 Multi-Place Working Hours** - Add multiple hospitals/clinics with individual schedules
+- ✅ **📅 Smart Day Selection** - "Select All Days" button for quick scheduling
+- ✅ **⏰ Default Timing** - Pre-filled with 10:00 AM to 7:00 PM
+- ✅ **📊 Daily OP Strength Ranges** - Select from 5 patient volume ranges (0-20, 20-50, 50-75, 75-100, 100+)
 - ✅ **Offline Capability** - PWA with service worker for offline functionality
 - ✅ **Installable** - Can be installed as a native app on mobile devices
 - ✅ **Multi-Step Form** - Progress indicator with 9 detailed sections
@@ -45,7 +50,9 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 - Full Name (auto-generated: "Dr. [First] [Middle] [Last]")
 - Gender (Male/Female/Other)
 - Date of Birth
-- Profile Photo URL
+- **📸 Profile Photo** - Take photo or upload from gallery
+- **📸 Hospital/Clinic Photo** - Capture workplace image
+- **📸 Logo Photo** - Upload clinic/hospital logo (optional)
 - Mobile Number (required)
 - Email ID
 - WhatsApp Enabled
@@ -61,11 +68,14 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 
 ### 3️⃣ Practice & Work Details
 - Practice Type (Clinic/Hospital/Both)
-- Primary Hospital Name
-- Secondary Hospitals (multiple)
-- Clinic Name
-- OPD Days (multi-select: Mon-Sun)
-- OPD Timings
+- **🏥 Hospital Working Details** (Multiple hospitals supported)
+  - Hospital Name
+  - Working Days (with "Select All Days" option)
+  - Working Hours (Default: 10:00 AM - 7:00 PM)
+- **🏪 Clinic Working Details** (Multiple clinics supported)
+  - Clinic Name
+  - Working Days (with "Select All Days" option)
+  - Working Hours (Default: 10:00 AM - 7:00 PM)
 - Consultation Fee (₹)
 - Teleconsultation Available
 
@@ -86,7 +96,12 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 - Workshop Conductor
 
 ### 6️⃣ Referral & Network Intelligence
-- Referral Capability (High/Medium/Low)
+- **📊 Daily OP Strength** (Multi-select patient volume ranges)
+  - 0-20 patients/day
+  - 20-50 patients/day
+  - 50-75 patients/day
+  - 75-100 patients/day
+  - 100+ patients/day
 - Common Referral Specialties
 - Inbound Referrals
 - Outbound Referrals
