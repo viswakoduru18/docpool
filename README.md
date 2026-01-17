@@ -17,6 +17,8 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 ### Mobile Application (Progressive Web App)
 - ✅ **Mobile-First Design** - Optimized for smartphones and tablets
 - ✅ **9-Section Data Collection Form** - Comprehensive doctor information capture
+- ✅ **Smart Name Entry** - Separate First, Middle, Last name fields with automatic "Dr." prefix
+- ✅ **Live Name Preview** - Real-time preview of full name as you type
 - ✅ **Offline Capability** - PWA with service worker for offline functionality
 - ✅ **Installable** - Can be installed as a native app on mobile devices
 - ✅ **Multi-Step Form** - Progress indicator with 9 detailed sections
@@ -37,7 +39,10 @@ A comprehensive, mobile-first Progressive Web App (PWA) for collecting and manag
 
 ### 1️⃣ Core Identification Details
 - Doctor ID (auto-generated: DOC-2026-XXXX)
-- Full Name
+- **First Name** (required) - Automatically prefixed with "Dr."
+- **Middle Name** (optional)
+- **Last Name** (required)
+- Full Name (auto-generated: "Dr. [First] [Middle] [Last]")
 - Gender (Male/Female/Other)
 - Date of Birth
 - Profile Photo URL
