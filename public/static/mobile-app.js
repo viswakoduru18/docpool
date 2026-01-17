@@ -372,6 +372,18 @@ const app = {
             ${this.renderInput('mobile_number', 'Mobile Number', 'tel', '+91 9876543210', true)}
             ${this.renderInput('email', 'Email ID', 'email', 'doctor@example.com')}
             ${this.renderCheckbox('whatsapp_enabled', 'WhatsApp Enabled')}
+            
+            <!-- Photo Upload Section -->
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-3">
+                <i class="fas fa-camera mr-2"></i>Photos
+              </label>
+              <div class="space-y-3">
+                ${this.renderPhotoUpload('profile_photo', 'Profile Photo', 'fa-user-circle')}
+                ${this.renderPhotoUpload('hospital_photo', 'Hospital/Clinic Photo', 'fa-hospital')}
+                ${this.renderPhotoUpload('logo_photo', 'Logo (if any)', 'fa-image')}
+              </div>
+            </div>
           </div>
         `;
         
@@ -392,19 +404,43 @@ const app = {
         return `
           <div class="space-y-4">
             ${this.renderSelect('practice_type', 'Practice Type', ['Clinic', 'Hospital', 'Both'])}
-            ${this.renderInput('primary_hospital_name', 'Primary Hospital Name', 'text')}
-            ${this.renderInput('clinic_name', 'Clinic Name', 'text')}
             ${this.renderInput('consultation_fee', 'Consultation Fee (₹)', 'number', '500')}
             ${this.renderCheckbox('teleconsultation_available', 'Teleconsultation Available')}
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <label class="block text-sm font-semibold text-gray-700 mb-2">OPD Days</label>
-              <div class="grid grid-cols-2 gap-2">
-                ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => `
-                  <label class="flex items-center space-x-2">
-                    <input type="checkbox" class="rounded" />
-                    <span class="text-sm">${day}</span>
-                  </label>
-                `).join('')}
+            
+            <!-- Hospital/Clinic Working Details -->
+            <div class="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <label class="block text-sm font-semibold text-gray-700">
+                  <i class="fas fa-hospital mr-2"></i>Hospital Details
+                </label>
+                <button 
+                  type="button"
+                  onclick="app.addWorkingPlace('hospital')"
+                  class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700"
+                >
+                  <i class="fas fa-plus mr-1"></i>Add
+                </button>
+              </div>
+              <div id="hospitalList" class="space-y-3">
+                ${this.renderWorkingPlaces('hospital')}
+              </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <label class="block text-sm font-semibold text-gray-700">
+                  <i class="fas fa-clinic-medical mr-2"></i>Clinic Details
+                </label>
+                <button 
+                  type="button"
+                  onclick="app.addWorkingPlace('clinic')"
+                  class="text-xs bg-green-600 text-white px-3 py-1 rounded-full hover:bg-green-700"
+                >
+                  <i class="fas fa-plus mr-1"></i>Add
+                </button>
+              </div>
+              <div id="clinicList" class="space-y-3">
+                ${this.renderWorkingPlaces('clinic')}
               </div>
             </div>
           </div>
@@ -437,7 +473,20 @@ const app = {
       case 6: // Referral Network
         return `
           <div class="space-y-4">
-            ${this.renderSelect('referral_capability', 'Referral Capability', ['High', 'Medium', 'Low'])}
+            <!-- Daily OP Strength -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-3">
+                <i class="fas fa-users mr-2"></i>Daily OP Strength (Select applicable ranges)
+              </label>
+              <div class="space-y-2">
+                ${this.renderCheckbox('op_strength_0_20', '0-20 patients/day')}
+                ${this.renderCheckbox('op_strength_20_50', '20-50 patients/day')}
+                ${this.renderCheckbox('op_strength_50_75', '50-75 patients/day')}
+                ${this.renderCheckbox('op_strength_75_100', '75-100 patients/day')}
+                ${this.renderCheckbox('op_strength_100_plus', '100+ patients/day')}
+              </div>
+            </div>
+            
             ${this.renderInput('common_referral_specialties', 'Common Referral Specialties', 'text', 'Cardio, Neuro, Ortho')}
             ${this.renderCheckbox('inbound_referrals', 'Inbound Referrals')}
             ${this.renderCheckbox('outbound_referrals', 'Outbound Referrals')}
@@ -556,6 +605,245 @@ const app = {
         <label for="${name}" class="text-sm font-semibold text-gray-700">${label}</label>
       </div>
     `;
+  },
+  
+  renderPhotoUpload(name, label, icon) {
+    const photoData = this.formData[name] || '';
+    return `
+      <div class="bg-white rounded-lg p-3 border border-gray-200">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          <i class="fas ${icon} mr-2"></i>${label}
+        </label>
+        <div class="flex items-center space-x-2">
+          <input
+            type="file"
+            id="${name}_file"
+            accept="image/*"
+            capture="environment"
+            class="hidden"
+            onchange="app.handlePhotoUpload(event, '${name}')"
+          />
+          <button
+            type="button"
+            onclick="document.getElementById('${name}_file').click()"
+            class="flex-1 bg-blue-100 text-blue-700 py-2 px-3 rounded-lg text-sm font-semibold hover:bg-blue-200 transition"
+          >
+            <i class="fas fa-camera mr-2"></i>Take Photo
+          </button>
+          <button
+            type="button"
+            onclick="document.getElementById('${name}_file').click(); document.getElementById('${name}_file').removeAttribute('capture');"
+            class="flex-1 bg-green-100 text-green-700 py-2 px-3 rounded-lg text-sm font-semibold hover:bg-green-200 transition"
+          >
+            <i class="fas fa-upload mr-2"></i>Upload
+          </button>
+        </div>
+        ${photoData ? `
+          <div class="mt-2 relative">
+            <img src="${photoData}" class="w-full h-32 object-cover rounded-lg" />
+            <button
+              type="button"
+              onclick="app.removePhoto('${name}')"
+              class="absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full hover:bg-red-600"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  },
+  
+  handlePhotoUpload(event, fieldName) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.formData[fieldName] = e.target.result;
+        this.render();
+      };
+      reader.readAsDataURL(file);
+    }
+  },
+  
+  removePhoto(fieldName) {
+    this.formData[fieldName] = '';
+    this.render();
+  },
+  
+  renderWorkingPlaces(type) {
+    if (!this.formData.working_places) {
+      this.formData.working_places = { hospital: [], clinic: [] };
+    }
+    
+    const places = this.formData.working_places[type] || [];
+    
+    if (places.length === 0) {
+      return `
+        <div class="text-center py-4 text-gray-500 text-sm">
+          <i class="fas fa-info-circle mr-2"></i>No ${type} added yet
+        </div>
+      `;
+    }
+    
+    return places.map((place, index) => `
+      <div class="bg-white rounded-lg p-3 border border-gray-300">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="font-semibold text-gray-800">${place.name}</h4>
+          <button
+            type="button"
+            onclick="app.removeWorkingPlace('${type}', ${index})"
+            class="text-red-600 hover:text-red-800"
+          >
+            <i class="fas fa-trash text-sm"></i>
+          </button>
+        </div>
+        <div class="text-xs text-gray-600 space-y-1">
+          <div><i class="fas fa-calendar mr-1"></i>${place.days.join(', ')}</div>
+          <div><i class="fas fa-clock mr-1"></i>${place.startTime} - ${place.endTime}</div>
+        </div>
+      </div>
+    `).join('');
+  },
+  
+  addWorkingPlace(type) {
+    // Create modal for adding working place
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.remove();
+    };
+    
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-t-2xl">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold">Add ${type === 'hospital' ? 'Hospital' : 'Clinic'}</h3>
+            <button onclick="this.closest('.fixed').remove()" class="text-white hover:text-gray-200">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-4 space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              ${type === 'hospital' ? 'Hospital' : 'Clinic'} Name *
+            </label>
+            <input
+              type="text"
+              id="place_name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter name"
+            />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Working Days *
+            </label>
+            <div class="space-y-2">
+              <button
+                type="button"
+                onclick="app.toggleAllDays()"
+                class="w-full bg-purple-100 text-purple-700 py-2 px-3 rounded-lg text-sm font-semibold hover:bg-purple-200 transition"
+              >
+                <i class="fas fa-check-double mr-2"></i>Select All Days
+              </button>
+              <div class="grid grid-cols-2 gap-2">
+                ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => `
+                  <label class="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+                    <input type="checkbox" class="day-checkbox rounded" value="${day}" />
+                    <span class="text-sm">${day}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Start Time</label>
+              <input
+                type="time"
+                id="start_time"
+                value="10:00"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">End Time</label>
+              <input
+                type="time"
+                id="end_time"
+                value="19:00"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          
+          <button
+            type="button"
+            onclick="app.saveWorkingPlace('${type}')"
+            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            <i class="fas fa-save mr-2"></i>Save
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  },
+  
+  toggleAllDays() {
+    const checkboxes = document.querySelectorAll('.day-checkbox');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+  },
+  
+  saveWorkingPlace(type) {
+    const name = document.getElementById('place_name').value;
+    const startTime = document.getElementById('start_time').value;
+    const endTime = document.getElementById('end_time').value;
+    const dayCheckboxes = document.querySelectorAll('.day-checkbox:checked');
+    const days = Array.from(dayCheckboxes).map(cb => cb.value);
+    
+    if (!name) {
+      alert('Please enter a name');
+      return;
+    }
+    
+    if (days.length === 0) {
+      alert('Please select at least one day');
+      return;
+    }
+    
+    if (!this.formData.working_places) {
+      this.formData.working_places = { hospital: [], clinic: [] };
+    }
+    
+    this.formData.working_places[type].push({
+      name,
+      days,
+      startTime,
+      endTime
+    });
+    
+    // Close modal
+    document.querySelector('.fixed').remove();
+    
+    // Re-render section
+    this.render();
+    
+    this.showToast(`${type === 'hospital' ? 'Hospital' : 'Clinic'} added successfully`, 'success');
+  },
+  
+  removeWorkingPlace(type, index) {
+    if (confirm('Remove this place?')) {
+      this.formData.working_places[type].splice(index, 1);
+      this.render();
+    }
   }
 };
 
