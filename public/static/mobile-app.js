@@ -35,6 +35,19 @@ const app = {
   
   async saveDoctor() {
     try {
+      // Construct full name with Dr. prefix from first, middle, and last names
+      const firstName = this.formData.first_name || '';
+      const middleName = this.formData.middle_name || '';
+      const lastName = this.formData.last_name || '';
+      
+      // Build full name with Dr. prefix
+      let fullName = 'Dr.';
+      if (firstName) fullName += ' ' + firstName;
+      if (middleName) fullName += ' ' + middleName;
+      if (lastName) fullName += ' ' + lastName;
+      
+      this.formData.full_name = fullName.trim();
+      
       const method = this.currentDoctor ? 'put' : 'post';
       const url = this.currentDoctor 
         ? `${API_BASE}/doctors/${this.currentDoctor.id}`
@@ -74,6 +87,25 @@ const app = {
   editDoctor(doctor) {
     this.currentDoctor = doctor;
     this.formData = { ...doctor };
+    
+    // Parse full_name back into first, middle, and last names
+    if (doctor.full_name) {
+      const nameParts = doctor.full_name.replace(/^Dr\.\s*/i, '').trim().split(/\s+/);
+      if (nameParts.length >= 3) {
+        this.formData.first_name = nameParts[0];
+        this.formData.middle_name = nameParts.slice(1, -1).join(' ');
+        this.formData.last_name = nameParts[nameParts.length - 1];
+      } else if (nameParts.length === 2) {
+        this.formData.first_name = nameParts[0];
+        this.formData.middle_name = '';
+        this.formData.last_name = nameParts[1];
+      } else if (nameParts.length === 1) {
+        this.formData.first_name = nameParts[0];
+        this.formData.middle_name = '';
+        this.formData.last_name = '';
+      }
+    }
+    
     this.currentSection = 1;
     this.showView('form');
   },
@@ -319,7 +351,22 @@ const app = {
       case 1: // Core Details
         return `
           <div class="space-y-4">
-            ${this.renderInput('full_name', 'Full Name', 'text', 'Dr. John Doe', true)}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-3">
+                <i class="fas fa-user-md mr-2"></i>Doctor's Name (Dr. prefix will be added automatically)
+              </label>
+              <div class="space-y-3">
+                ${this.renderInput('first_name', 'First Name', 'text', 'John', true)}
+                ${this.renderInput('middle_name', 'Middle Name', 'text', 'Kumar')}
+                ${this.renderInput('last_name', 'Last Name', 'text', 'Doe', true)}
+              </div>
+              <div class="mt-3 p-3 bg-white rounded border border-blue-300">
+                <p class="text-xs text-gray-600 mb-1">Preview:</p>
+                <p class="font-semibold text-blue-700">
+                  Dr. ${this.formData.first_name || '[First]'} ${this.formData.middle_name || ''} ${this.formData.last_name || '[Last]'}
+                </p>
+              </div>
+            </div>
             ${this.renderSelect('gender', 'Gender', ['Male', 'Female', 'Other'])}
             ${this.renderInput('date_of_birth', 'Date of Birth', 'date')}
             ${this.renderInput('mobile_number', 'Mobile Number', 'tel', '+91 9876543210', true)}
@@ -446,6 +493,10 @@ const app = {
   
   renderInput(name, label, type, placeholder, required) {
     const value = this.formData[name] || '';
+    // Add oninput for name fields to update preview
+    const isNameField = ['first_name', 'middle_name', 'last_name'].includes(name);
+    const inputHandler = isNameField ? `oninput="app.formData.${name} = this.value; app.render();"` : `onchange="app.formData.${name} = this.value"`;
+    
     return `
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -456,7 +507,7 @@ const app = {
           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="${placeholder || ''}"
           value="${value}"
-          onchange="app.formData.${name} = this.value"
+          ${inputHandler}
           ${required ? 'required' : ''}
         />
       </div>
