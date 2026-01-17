@@ -104,7 +104,8 @@ app.post('/api/doctors', async (c) => {
   try {
     const result = await env.DB.prepare(`
       INSERT INTO doctors (
-        doctor_id, full_name, gender, date_of_birth, profile_photo_url,
+        doctor_id, full_name, first_name, middle_name, last_name, 
+        gender, date_of_birth, profile_photo_url,
         mobile_number, email, whatsapp_enabled,
         primary_qualification, specialization, super_specialization,
         years_of_experience, medical_council_reg_no, registration_council,
@@ -124,11 +125,14 @@ app.post('/api/doctors', async (c) => {
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
       )
     `).bind(
       doctorId,
       data.full_name || '',
+      data.first_name || null,
+      data.middle_name || null,
+      data.last_name || null,
       data.gender || null,
       data.date_of_birth || null,
       data.profile_photo_url || null,
