@@ -1,0 +1,12 @@
+{
+  "appId": "ai.docpool.app",
+  "appName": "DocPool",
+  "webDir": "dist",
+  "server": {
+    "url": "https://4b33a14c.docpool.pages.dev",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
