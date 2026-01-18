@@ -14,6 +14,53 @@ app.use('/api/*', cors())
 // Serve static files
 app.use('/static/*', serveStatic({ root: './public' }))
 
+// Serve manifest.json
+app.get('/manifest.json', (c) => {
+  return c.json({
+    "name": "DocPool - Doctor Information Management",
+    "short_name": "DocPool",
+    "description": "Comprehensive doctor information collection and management system",
+    "start_url": "/mobile",
+    "display": "standalone",
+    "background_color": "#2563eb",
+    "theme_color": "#2563eb",
+    "orientation": "portrait",
+    "icons": [
+      {
+        "src": "/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ],
+    "categories": ["medical", "productivity", "business"]
+  })
+})
+
+// Serve icons (base64 encoded for simplicity)
+app.get('/icon-192.png', async (c) => {
+  // Simple blue gradient square icon with 'D' for DocPool
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4F46E5"/><stop offset="100%" style="stop-color:#2563EB"/></linearGradient></defs><rect width="192" height="192" fill="url(#g)" rx="30"/><circle cx="96" cy="60" r="20" fill="white" opacity="0.9"/><rect x="76" y="80" width="40" height="10" fill="white" opacity="0.9" rx="5"/><rect x="66" y="95" width="20" height="35" fill="white" opacity="0.9" rx="3"/><rect x="106" y="95" width="20" height="35" fill="white" opacity="0.9" rx="3"/></svg>`
+  
+  c.header('Content-Type', 'image/svg+xml')
+  c.header('Cache-Control', 'public, max-age=31536000')
+  return c.body(iconSVG)
+})
+
+app.get('/icon-512.png', async (c) => {
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4F46E5"/><stop offset="100%" style="stop-color:#2563EB"/></linearGradient></defs><rect width="512" height="512" fill="url(#g)" rx="80"/><circle cx="256" cy="160" r="50" fill="white" opacity="0.9"/><rect x="216" y="210" width="80" height="25" fill="white" opacity="0.9" rx="12"/><rect x="186" y="240" width="50" height="90" fill="white" opacity="0.9" rx="8"/><rect x="276" y="240" width="50" height="90" fill="white" opacity="0.9" rx="8"/></svg>`
+  
+  c.header('Content-Type', 'image/svg+xml')
+  c.header('Cache-Control', 'public, max-age=31536000')
+  return c.body(iconSVG)
+})
+
 // ============================================================================
 // API ROUTES - Doctor Management
 // ============================================================================
@@ -344,7 +391,7 @@ app.get('/mobile', (c) => {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="theme-color" content="#2563eb">
         <title>DocPool - Mobile App</title>
-        <link rel="manifest" href="/static/manifest.json">
+        <link rel="manifest" href="/manifest.json">
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
